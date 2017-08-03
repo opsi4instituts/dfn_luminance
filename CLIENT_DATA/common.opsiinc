@@ -1,0 +1,71 @@
+requiredWinstVersion >= "4.11.2.6"
+
+DefVar $CustomPostInstall$
+DefVar $CustomPostDeinstall$
+DefVar $DesktopLink$
+DefVar $SilenceLevel$
+DefVar $ExitCode$
+DefVar $InstallDir$
+DefVar $InstalledVersion$
+DefVar $InstFile$
+DefVar $InstSystemType$
+DefVar $LogDir$
+DefVar $MinimumSpace$
+DefVar $MSVersion$
+DefVar $Exe$
+DefVar $PathToExe$
+DefVar $ProductId$  
+DefVar $ProductName$
+DefVar $ProductVersion$
+DefVar $RegId$
+DefVar $RegPathUninstall$
+DefVar $SearchPattern$
+DefVar $UninstallProgram$
+DefStringList $FileInfoList$
+DefStringlist $ResultList64$
+DefStringList $ResultList32$
+
+Set $InstSystemType$   = GetSystemType
+Set $MSVersion$	 = GetMsVersionInfo
+Set $LogDir$ = "%opsiLogDir%"
+
+; removes the package version number from the software version
+Set $ProductVersion$	= takestring (0, splitString("%installingProdVersion%", "-"))
+
+set $DesktopLink$ = getProductProperty("desktop-link","false")
+Set $SilenceLevel$ = getProductProperty("silence-level", "/silent")
+
+; ----------------------------------------------------------------
+; - Please edit the following values                             -
+; ----------------------------------------------------------------
+Set $ProductId$		= "luminance"
+Set $ProductName$	= "Luminance HDR"
+Set $SearchPattern$ = $ProductId$
+Set $MinimumSpace$	= "290 MB"
+Set $RegPathUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+Set $InstFile$		= "Luminance-HDR-x64-SETUP-v" + $ProductVersion$ + ".exe"
+Set $Exe$ 		= "luminance-hdr.exe"
+; ----------------------------------------------------------------
+
+setloglevel = 6
+
+include_append "section_sub_check_exitcode.opsiinc"
+include_append "section_sub_search_registry32_uninstall_keys.opsiinc"
+include_append "section_sub_search_registry64_uninstall_keys.opsiinc"
+
+if not ($InstSystemType$ = "64 Bit System")
+	LogError "There is no 32 bit version included in this package!"
+	isFatalError
+endif
+if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
+	Logwarning "Only tested with Windows 7 and 10! Please report to the maintainer in case of successful installation on other Windows versions."		
+endif
+
+comment "Show product picture"
+if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
+       comment "logo at local library/icons found."
+       ShowBitmap "%ScriptPath%\..\lib\icons\%installingProdName%.png" $ProductName$
+else
+       comment "no logo at local library/icons, use from ScriptPath ..."
+       ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
+endif

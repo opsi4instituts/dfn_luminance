@@ -1,0 +1,67 @@
+[Actions]
+; common Values for (un)installation
+include_insert "common.opsiinc"
+
+if not(HasMinimumSpace ("%SystemDrive%", $MinimumSpace$))
+	LogError "Not enough space on %SystemDrive%, " + $MinimumSpace$ + " on drive %SystemDrive% needed for " + $ProductId$
+	isFatalError
+	;Stop process and set installation status to failed
+else
+	if FileExists("%ScriptPath%\delsub64.opsiscript")
+		comment "Start uninstall sub section"
+		Sub "%ScriptPath%\delsub64.opsiscript"
+	endif
+	
+	Message "Installing %installingProdName% (%installingProdVersion%) 64 Bit..."
+	comment "Starting the setup program"
+	Winbatch_install
+	sub_check_exitcode
+
+	comment "Testing for installation success"
+	; Parameter: $SearchPattern$: Suchbegriff in Registry
+	Sub_search_registry64_uninstall_keys
+	; Rückgabewert: $ResultList64$ gefundene Einträge
+	
+	; Versionsnummer ist in den installierten Dateien enthalten.
+	if ( count ($ResultList64$) = "0" )
+		logError "Fatal: After Installation " + $ProductName$ + " could not be found in " + $RegPathUninstall$
+		isFatalError
+	else
+		Set $RegId$ = takeString(0, $ResultList64$)
+		comment "Get 'InstallLocation' from registry for path to exe"
+		Set $PathToExe$ = "" + GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] InstallLocation") + $Exe$
+		
+		; Verifies if product version number matches installed version number
+		set $FileInfoList$ = getFileInfoMap($PathToExe$)
+		set $InstalledVersion$ = getValue("file version with dots", $FileInfoList$)
+		; luminance executable file version consistently has an extra zero digit at the end, therefore substring comparison
+		if not (contains($InstalledVersion$, $ProductVersion$))
+			logError "Fatal: Installed product version is " + $InstalledVersion$ + " but is supposed to be " + $ProductVersion$
+			isFatalError
+		endif
+				
+		if $DesktopLink$ = "true"
+			comment "Create common desktop link"
+			Linkfolder_create_desktoplink
+		endif
+		
+		comment "include custom post install file"
+		set $CustomPostInstall$ = getProductProperty("custom-post-install","none")
+		if not ($CustomPostInstall$ = "none")
+			if FileExists("%ScriptPath%\custom\" + $CustomPostInstall$)
+				include_insert "%ScriptPath%\custom\" + $CustomPostInstall$	
+			endif
+		endif
+	endif
+endif
+
+[Winbatch_install]
+"%ScriptPath%\$InstFile$" /sp- $SilenceLevel$ /norestart /nocancel /SUPPRESSMSGBOXES
+
+[Linkfolder_create_desktoplink]
+set_basefolder common_desktopdirectory
+set_subfolder ""
+set_link
+	name: $ProductName$
+	target: $PathToExe$
+end_link

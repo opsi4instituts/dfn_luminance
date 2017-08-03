@@ -1,0 +1,65 @@
+; Parameter: $SearchPattern$: Suchbegriff in Registry
+; sucht die 64 und die 32 bit Registry nach einer Installation durch
+; Rückgabewert: $ResultList32$ gefundene 32bit Einträge
+; Rückgabewert: $ResultList64$ gefundene 64bit Einträge
+Sub_search_registry32_uninstall_keys
+Sub_search_registry64_uninstall_keys
+
+if (count($ResultList32$) = "0") AND (count($ResultList64$) = "0")
+	comment "No installations of " + $SearchPattern$ + " found in registry"
+else
+	if (count($ResultList32$) = "1")
+		comment "Found one installation of " + $SearchPattern$ + " in 32-bit registry, try to deinstall"
+		Set $RegId$ = takeString(0, $ResultList32$)
+		Set $UninstallProgram$ = GetRegistryStringValue32("[" + $RegPathUninstall$ + "\" + $RegId$ + "] UninstallString")
+		; String aus Registry enthält störende Anführungszeichen
+		Set $UninstallProgram$ = takeString (1, splitString ( $UninstallProgram$ , '"')) 
+		Set $InstallDir$ = GetRegistryStringValue32("[" + $RegPathUninstall$ + "\" + $RegId$ + "] InstallLocation")
+		Sub_uninstall
+	endif
+	if (count($ResultList32$) > "1")
+		logError "Found more than one installation in the 32bit registry, there is something wrong."
+		isFatalError
+	endif
+	if (count($ResultList64$) = "1")
+		comment "Found one installation of " + $SearchPattern$ + " in 64-bit registry, try to deinstall"
+		Set $RegId$ = takeString(0, $ResultList64$)
+		Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] UninstallString")
+		; String aus Registry enthält störende Anführungszeichen
+		Set $UninstallProgram$ = takeString (1, splitString ( $UninstallProgram$ , '"')) 
+		Set $InstallDir$ = GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] InstallLocation")
+		Sub_uninstall
+	endif
+	if (count($ResultList64$) > "1")
+		logError "Found more than one installation in the 64bit registry, there is something wrong."
+		isFatalError	
+	endif
+endif
+	
+[Sub_uninstall]
+Winbatch_uninstall
+sub_check_exitcode
+
+if $DesktopLink$ = "true"
+	comment "Delete common desktop link"
+	Linkfolder_delete_desktoplink
+endif
+
+comment "include custom post install file"
+set $CustomPostDeinstall$ = getProductProperty("custom-post-deinstall","none")
+if not ($CustomPostDeinstall$ = "none")
+	if FileExists("%ScriptPath%\custom\" + $CustomPostDeinstall$)
+		include_insert "%ScriptPath%\custom\" + $CustomPostDeinstall$
+	endif
+endif
+
+[Winbatch_uninstall]
+"$UninstallProgram$" $SilenceLevel$ /norestart /nocancel /SUPPRESSMSGBOXES
+
+[Files_uninstall]
+delete -sf "$InstallDir$\"
+
+[LinkFolder_delete_desktoplink]
+set_basefolder common_desktopdirectory
+set_subfolder ""
+delete_element $ProductName$
