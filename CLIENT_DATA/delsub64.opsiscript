@@ -54,7 +54,7 @@ if not ($CustomPostDeinstall$ = "none")
 endif
 
 [Winbatch_uninstall]
-"$UninstallProgram$" $SilenceLevel$ /norestart /nocancel /SUPPRESSMSGBOXES
+"$UninstallProgram$" $SilentOption$ /norestart /nocancel /SUPPRESSMSGBOXES
 
 [Files_uninstall]
 delete -sf "$InstallDir$\"

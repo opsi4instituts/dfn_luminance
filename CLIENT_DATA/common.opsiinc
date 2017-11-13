@@ -3,7 +3,7 @@ requiredWinstVersion >= "4.11.2.6"
 DefVar $CustomPostInstall$
 DefVar $CustomPostDeinstall$
 DefVar $DesktopLink$
-DefVar $SilenceLevel$
+DefVar $SilentOption$
 DefVar $ExitCode$
 DefVar $InstallDir$
 DefVar $InstalledVersion$
@@ -32,15 +32,15 @@ Set $LogDir$ = "%opsiLogDir%"
 ; removes the package version number from the software version
 Set $ProductVersion$	= takestring (0, splitString("%installingProdVersion%", "-"))
 
-set $DesktopLink$ = getProductProperty("desktop-link","false")
-Set $SilenceLevel$ = getProductProperty("silence-level", "/silent")
+Set $DesktopLink$ = getProductProperty("desktop-link","false")
+Set $SilentOption$ = getProductProperty("silent-option", "/silent")
 
 ; ----------------------------------------------------------------
 ; - Please edit the following values                             -
 ; ----------------------------------------------------------------
 Set $ProductId$		= "luminance"
 Set $ProductName$	= "Luminance HDR"
-Set $SearchPattern$ = $ProductId$
+Set $SearchPattern$     =  $ProductId$
 Set $MinimumSpace$	= "290 MB"
 Set $RegPathUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 Set $InstFile$		= "Luminance-HDR-x64-SETUP-v" + $ProductVersion$ + ".exe"

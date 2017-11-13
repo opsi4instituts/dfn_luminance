@@ -3,7 +3,7 @@ Message "Profile Patch for Luminance HDR ...."
 
 if getValue("installationstate", getProductMap) = "installed"
 	comment "Product is installed"
-	if (GetRegistryStringValue64("[HKEY_CURRENT_USER\Software\Luminance HDR Development Team\Luminance HDR] DonationDialogShow") = "true")
+	if not (GetRegistryStringValue64("[HKEY_CURRENT_USER\Software\Luminance HDR Development Team\Luminance HDR] DonationDialogShow") = "false")
 		comment "donation dialog is set to be shown"
 		Registry_currentuser_set
 	endif
