@@ -1,5 +1,6 @@
-requiredWinstVersion >= "4.11.2.6"
+requiredWinstVersion >= "4.12.0.16"
 
+DefVar $ErrorString$
 DefVar $CustomPostInstall$
 DefVar $CustomPostDeinstall$
 DefVar $DesktopLink$
@@ -18,15 +19,13 @@ DefVar $ProductId$
 DefVar $ProductName$
 DefVar $ProductVersion$
 DefVar $RegId$
-DefVar $RegPathUninstall$
-DefVar $SearchPattern$
+DefVar $RegBitScope$
 DefVar $UninstallProgram$
 DefStringList $FileInfoList$
-DefStringlist $ResultList64$
-DefStringList $ResultList32$
+DefStringlist $ResultList$
 
-Set $InstSystemType$   = GetSystemType
-Set $MSVersion$	 = GetMsVersionInfo
+Set $InstSystemType$ = GetSystemType
+Set $MSVersion$	= GetMsVersionInfo
 Set $LogDir$ = "%opsiLogDir%"
 
 ; removes the package version number from the software version
@@ -38,20 +37,17 @@ Set $SilentOption$ = getProductProperty("silent-option", "/silent")
 ; ----------------------------------------------------------------
 ; - Please edit the following values                             -
 ; ----------------------------------------------------------------
-Set $ProductId$		= "luminance"
-Set $ProductName$	= "Luminance HDR"
-Set $SearchPattern$     =  $ProductId$
-Set $MinimumSpace$	= "290 MB"
-Set $RegPathUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-Set $InstFile$		= "Luminance-HDR-x64-SETUP-v" + $ProductVersion$ + ".exe"
-Set $Exe$ 		= "luminance-hdr.exe"
+Set $ProductId$			= "luminance"
+Set $ProductName$		= "Luminance HDR"
+Set $MinimumSpace$		= "290 MB"
+Set $InstFile$			= "Luminance-HDR-x64-SETUP-v" + $ProductVersion$ + ".exe"
+Set $Exe$ 				= "luminance-hdr.exe"
 ; ----------------------------------------------------------------
 
-setloglevel = 6
-
-include_append "section_sub_check_exitcode.opsiinc"
-include_append "section_sub_search_registry32_uninstall_keys.opsiinc"
-include_append "section_sub_search_registry64_uninstall_keys.opsiinc"
+; Library registry search uninstall keys (local functions)
+importLib "func_search_registry_uninstall_keys.opsiinc"
+; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
+importLib "uib_exitcode.opsiscript::isInnoExitcodeFatal"
 
 if not ($InstSystemType$ = "64 Bit System")
 	LogError "There is no 32 bit version included in this package!"

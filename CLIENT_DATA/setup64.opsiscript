@@ -15,31 +15,40 @@ else
 	Message "Installing %installingProdName% (%installingProdVersion%) 64 Bit..."
 	comment "Starting the setup program"
 	Winbatch_install
-	sub_check_exitcode
-
-	comment "Testing for installation success"
-	; Parameter: $SearchPattern$: Suchbegriff in Registry
-	Sub_search_registry64_uninstall_keys
-	; Rückgabewert: $ResultList64$ gefundene Einträge
+	Set $ExitCode$ = getLastExitCode
+	if stringToBool(isInnoExitcodeFatal($ExitCode$, "True", $ErrorString$))
+		isFatalError
+	endif
 	
-	; Versionsnummer ist in den installierten Dateien enthalten.
-	if ( count ($ResultList64$) = "0" )
-		logError "Fatal: After Installation " + $ProductName$ + " could not be found in " + $RegPathUninstall$
+	comment "Test for installation success"
+	Set $ResultList$ = SearchRegistryUninstallKeys($ProductName$)
+	if ( count ($ResultList$) = "0" )
+		logError "Fatal: After Installation " + $ProductName$ + " could not be found in registry."
 		isFatalError
 	else
-		Set $RegId$ = takeString(0, $ResultList64$)
-		comment "Get 'InstallLocation' from registry for path to exe"
-		Set $PathToExe$ = "" + GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] InstallLocation") + $Exe$
+		Set $RegId$ = takeString (0,splitString(takeString(0,$ResultList$), '|'))
+		Set $RegBitScope$ = takeString (1,splitString(takeString(0,$ResultList$), '|'))
 		
-		; Verifies if product version number matches installed version number
-		set $FileInfoList$ = getFileInfoMap($PathToExe$)
-		set $InstalledVersion$ = getValue("file version with dots", $FileInfoList$)
-		; luminance executable file version consistently has an extra zero digit at the end, therefore substring comparison
-		if not (contains($InstalledVersion$, $ProductVersion$))
-			logError "Fatal: Installed product version is " + $InstalledVersion$ + " but is supposed to be " + $ProductVersion$
+		comment "Get 'InstallLocation' from registry for path to exe"
+		Set $InstallDir$ = GetRegistryValue($RegId$, "InstallLocation", $RegBitScope$)
+		
+		comment "Check version"
+		Set $PathToExe$ = $InstallDir$ + $Exe$
+		
+		if FileExists($PathToExe$)
+			set $FileInfoList$ = getFileInfoMap($PathToExe$)
+			set $InstalledVersion$ = getValue("file version with dots", $FileInfoList$)
+		else
+			logError "Fatal: cannot find $PathToExe$ after installation"
 			isFatalError
 		endif
-				
+		if contains($InstalledVersion$, $ProductVersion$)
+			comment "Successful Installation"
+		else
+			logError "Fatal: expected version "+ $ProductVersion$ + ", but got " + $InstalledVersion$
+			isFatalError
+		endif
+		
 		if $DesktopLink$ = "true"
 			comment "Create common desktop link"
 			Linkfolder_create_desktoplink

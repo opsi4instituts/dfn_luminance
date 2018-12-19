@@ -1,7 +1,6 @@
 [Package]
-version: 3
+version: 4
 depends: 
-incremental: False
 
 [Product]
 type: localboot
@@ -55,6 +54,11 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
+dfn_luminance (2.5.1-4)
+	* neue Registrysuche (https://github.com/opsi4instituts/lib, winst-Version 4.12.0.16 Voraussetzung)
+	* neues o4i-Logo
+ -- David Dams (archIT/KIT) <david.dams9@kit.edu>, 18.12.2018
+
 dfn_luminance (2.5.1-3)
 	* Anpassungen gem. DFN-Richtlinien
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 13.11.2017
@@ -66,21 +70,3 @@ dfn_luminance (2.5.1-2)
 dfn_luminance (2.5.1-1)
 	* Initiales DFN-Paket
  -- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 01.08.2017
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
