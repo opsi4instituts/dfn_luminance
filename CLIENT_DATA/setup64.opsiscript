@@ -65,7 +65,7 @@ else
 endif
 
 [Winbatch_install]
-"%ScriptPath%\$InstFile$" /sp- $SilentOption$ /norestart /nocancel /SUPPRESSMSGBOXES
+"$InstFile$" /sp- $SilentOption$ /norestart /nocancel /SUPPRESSMSGBOXES
 
 [Linkfolder_create_desktoplink]
 set_basefolder common_desktopdirectory

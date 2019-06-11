@@ -18,11 +18,13 @@ DefVar $PathToExe$
 DefVar $ProductId$  
 DefVar $ProductName$
 DefVar $ProductVersion$
+DefVar $SearchTerm$
 DefVar $RegId$
 DefVar $RegBitScope$
 DefVar $UninstallProgram$
 DefStringList $FileInfoList$
 DefStringlist $ResultList$
+DefStringList $InstFileList$
 
 Set $InstSystemType$ = GetSystemType
 Set $MSVersion$	= GetMsVersionInfo
@@ -40,14 +42,29 @@ Set $SilentOption$ = getProductProperty("silent-option", "/silent")
 Set $ProductId$			= "luminance"
 Set $ProductName$		= "Luminance HDR"
 Set $MinimumSpace$		= "290 MB"
-Set $InstFile$			= "Luminance-HDR-x64-SETUP-v" + $ProductVersion$ + ".exe"
 Set $Exe$ 				= "luminance-hdr.exe"
 ; ----------------------------------------------------------------
 
-; Library registry search uninstall keys (local functions)
-importLib "func_search_registry_uninstall_keys.opsiinc"
 ; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
 importLib "uib_exitcode.opsiscript::isInnoExitcodeFatal"
+; Library registry actions (local functions)
+importLib "lib_registry_functions.opsiinc::SearchRegistryUninstallKeys"
+; Library file actions (local functions)
+importLib "lib_file_functions.opsiinc::findFileNameFromPath"
+
+; suche Installer im %ScriptPath% und liefere den Pfad gleich mit
+Set $SearchTerm$ = $ProductId$ + "*.exe"
+Set $InstFileList$ = findFileNameFromPath($SearchTerm$, "%ScriptPath%",  "true")
+if not (count($InstFileList$) = "1")
+	LogError "Obviously the maintainer forgot to delete an old installer file!!!"
+	isFatalError
+endif
+; nur den letzten und einzigsten ;-) Treffer nehmen
+Set $InstFile$ = takeString(-1,$InstFileList$)
+if not (contains($InstFile$, $ProductVersion$))
+	LogError "Can not find $ProductVersion$ in $InstFile$!!!"
+	isFatalError
+endif
 
 if not ($InstSystemType$ = "64 Bit System")
 	LogError "There is no 32 bit version included in this package!"

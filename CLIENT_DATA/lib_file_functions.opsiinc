@@ -1,0 +1,27 @@
+;@author		Thomas Besser
+;@email			thomas.besser@kit.edu
+;@date			06.05.2019
+;@copyright		AGPLv3
+;@version		0.91
+;@Description	Find a file name in specific path with pattern
+;@Returns		Returns stringlist (multiple hits possible)
+;@Returns		Single string item is file with path inclusive
+;@ParamDesc_$SearchTerm$	pattern to search file names
+;@ParamDesc_$Path$ Path in which search is done
+;@ParamDesc_$AddPathToResult$ Should the path itself be added to result
+
+DefFunc findFileNameFromPath(val $SearchTerm$ : string, val $Path$ : string, val $AddPathToResult$ : string) : stringlist
+	DefStringList $List$
+	DefStringList $NewList$
+	Set $List$ = ShellCall('dir /b "' + $Path$ + '\' + $SearchTerm$ + '"')
+	; Ergebnis von "dir" _ohne_ Pfad, diesen ergänzen, sofern $AddPathToResult$ 
+	if stringToBool($AddPathToResult$)
+		for %item% in $List$ do Sub_add_path
+		Set $result$ = $NewList$
+	else
+		Set $result$ = $List$
+	endif
+	
+	[Sub_add_path]
+	Set $NewList$ = addtolist($NewList$, $Path$ + "\" + "%item%")
+endfunc

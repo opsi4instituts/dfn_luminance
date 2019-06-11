@@ -1,5 +1,5 @@
 [Package]
-version: 4
+version: 1
 depends: 
 
 [Product]
@@ -8,7 +8,7 @@ id: dfn_luminance
 name: Luminance HDR
 description: Erstellung und Bearbeitung von Bildern mit einem hohem Kontrastumfang (High-Dynamic-Range, HDR)
 advice: 
-version: 2.5.1
+version: 2.6.0
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -54,6 +54,12 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
+dfn_luminance (2.6.0-1)
+	* neue Upstreamversion
+	* InstFile inkl. Pfad automatisch komplettieren (local function, produktversionsunabhängig)
+	* Umstellung auf 'lib_file_functions.opsiinc' (RegSuche)
+ -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 11.06.2019
+
 dfn_luminance (2.5.1-4)
 	* neue Registrysuche (https://github.com/opsi4instituts/lib, winst-Version 4.12.0.16 Voraussetzung)
 	* neues o4i-Logo
